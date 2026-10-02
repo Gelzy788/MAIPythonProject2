@@ -22,6 +22,13 @@ class InvalidTimestampError(StreamStatsError):
     def __init__(self):
         super().__init__("В файле неверная временная метка")
 
+class InvalidLevelError(StreamStatsError):
+    """Ошибка неизвестного уровня лога
+    """
+    
+    def __init__(self):
+        super().__init__("В файле неизвестный уровень лога")
+
 class CliConfigurationError(StreamStatsError):
     """Ошибка конфигурации CLI
     """
