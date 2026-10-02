@@ -1,7 +1,7 @@
 from enum import Enum
 from dataclasses import dataclass
 from datetime import datetime
-from errors import InvalidTimestampError, InvalidLevelError
+from streamstats.errors import InvalidTimestampError
 
 class Level(Enum):
     """Enum уровней логов.
@@ -14,6 +14,8 @@ class Level(Enum):
 
 @dataclass(frozen=True)
 class Event:
+    """Класс с данными одного лога
+    """
     timestamp: datetime
     level: Level
     source: str
@@ -21,17 +23,31 @@ class Event:
     
     @staticmethod
     def create_event(data: dict) -> Event:
+        """Конструктор объектов Event
+
+        Args:
+            data (dict): Данные из строки с логами
+
+        Raises:
+            InvalidTimestampError: Если неправильный формат времени
+            InvalidLevelError: Если неизвестный уровень лога
+
+        Returns:
+            Event: Объект класса Event
+        """
         try:
             timestamp = datetime.fromisoformat(data["timestamp"])
         except ValueError:
             raise InvalidTimestampError()
         
-        try:
-            level = Level(data["level"])
+        try: # NOTE: Надо ли писать кастомное сообщение? Или вообще сделать отдельную ошибку?
+            level = Level(data["level"].upper())
         except ValueError:
-            raise InvalidLevelError()
+            raise InvalidEventError()
         
-        # TODO: Добавить валидацию
+        if data["source"] == "":
+            raise InvalidEventError()
+        
         return Event(timestamp,
                     level,
                     data["source"],

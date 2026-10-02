@@ -16,18 +16,11 @@ class InvalidEventError(StreamStatsError):
         super().__init__("Хз пока")
         # TODO: Написать сообщение ошибки
 
-class InvalidTimestampError(StreamStatsError):
+class InvalidTimestampError(InvalidEventError):
     """Ошибка неверной временной метки
     """
     def __init__(self):
         super().__init__("В файле неверная временная метка")
-
-class InvalidLevelError(StreamStatsError):
-    """Ошибка неизвестного уровня лога
-    """
-    
-    def __init__(self):
-        super().__init__("В файле неизвестный уровень лога")
 
 class CliConfigurationError(StreamStatsError):
     """Ошибка конфигурации CLI
