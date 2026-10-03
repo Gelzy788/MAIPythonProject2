@@ -55,11 +55,13 @@ class Event:
     
 
 if __name__ == "__main__":
-    data = {
-        "timestamp": "2026-10-02T12:30:45+03:00",
-        "level": "DEBUG",
-        "source": "hello",
-        "message": "Hello World!"
-    }
-    event1 = Event.create_event(data)
-    print(event1)
+    # data = {
+    #     "timestamp": "2026-10-02T12:30:45+03:00",
+    #     "level": "DEBUG",
+    #     "source": "hello",
+    #     "message": "Hello World!"
+    # }
+    # event1 = Event.create_event(data)
+    # print(event1)
+    for i in Level:
+        print(i)
