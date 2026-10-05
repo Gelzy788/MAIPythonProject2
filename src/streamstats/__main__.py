@@ -5,7 +5,7 @@ from streamstats.models import *
 
 if __name__ == "__main__":
     stat = StatsCounter()
-    for i in EventList(["test_csv_files/test_files/valid.csv"], "csv", False):
+    for i in EventList(["test_csv_files/test_files/valid.jsonl"], "jsonl", False):
         stat.add_log(i)
 
     print(stat.count_of_levels[Level.CRITICAL])

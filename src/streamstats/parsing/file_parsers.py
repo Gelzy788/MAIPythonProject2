@@ -18,8 +18,8 @@ def parse_jsonl(file: _io.TextIOWrapper) -> Iterator[dict[str, str | Level | dat
     Yields:
         Итератор с данными одного лога в формате словаря
     """
-    for line_data in file:
-        yield json.loads(line_data)
+    for line_data in enumerate(file):
+        yield (line_data[0], json.loads(line_data[1]))
 
 if __name__ == "__main__":
     # with open("test_csv_files/test_files/valid.csv", "r", encoding="utf-8") as f:
