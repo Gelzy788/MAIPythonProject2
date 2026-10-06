@@ -13,9 +13,9 @@ class StatsCounter:
         self.last_timestamp: datetime = None
     
     def get_top_5_sources(self) -> list[str]:
-        # TODO: сделать возврат топ-5 источников
-        return {"Здесь будет топ 5": "Источников",
-                "И еще что-то": "Наверное"}
+        source_error_count_printable = dict(sorted(self.source_error_count.items(), key=lambda a: a[1]))
+        
+        return self.source_error_count
     
     def add_log(self, log: Event) -> None:
         self.count_of_logs += 1
@@ -41,8 +41,12 @@ class StatsCounter:
             self.last_timestamp = log.timestamp
     
     def get_stats(self) -> dict:
+        count_of_levels_printable = {}
+        for key, value in self.count_of_levels.items():
+            count_of_levels_printable[key.value] = value
+            
         return {"count_of_logs": self.count_of_logs,
-                "count_of_levels": self.count_of_levels,
+                "count_of_levels": count_of_levels_printable,
                 "source_event_count": self.source_event_count,
                 "source_error_count": self.get_top_5_sources(),
                 "first_timestamp": self.first_timestamp.isoformat() if self.first_timestamp else None,
