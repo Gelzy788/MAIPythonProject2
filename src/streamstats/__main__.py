@@ -9,7 +9,7 @@ if __name__ == "__main__":
     for i in EventList(["test_csv_files/test_files/valid.jsonl"], "jsonl", False):
         stat.add_log(i)
 
-    ResultCreator.result_create(result=stat.get_stats())
+    ResultCreator.result_create(result=stat.to_dict())
     # print(stat.count_of_levels[Level.CRITICAL])
     # print(stat.count_of_logs)
     # print(stat.source_error_count)

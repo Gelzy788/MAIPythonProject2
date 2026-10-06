@@ -16,4 +16,5 @@ class ResultCreator:
         pass
     
     def _print_result(result: dict):
+        #TODO: Переделать print тк, чтобы он не менял очередность в топ-5
         pprint(result)
