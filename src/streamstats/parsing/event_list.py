@@ -42,7 +42,6 @@ class EventList:
             Iterator[Event]: один итератор с логом в формате объекта Event
         """
         for num, path in enumerate(self.paths):
-            # TODO: Сделать поддержку ввода файлов без расширения(input вместо input.csv)
             with open(path, "r" , encoding="utf-8") as file:
                 for line_num, line in self._parse_file(file, self.file_format[num]):
                     try:

@@ -25,7 +25,6 @@ class StatsCounter:
         source_error_count_printable = dict(sorted(self.source_error_count.items(), key=lambda a: a[1], reverse=True))
         
         if len(source_error_count_printable) >= HOW_MUCH_TOP_SOURCES:
-            print(dict(list(source_error_count_printable.items())))
             return dict(list(source_error_count_printable.items())[:HOW_MUCH_TOP_SOURCES])
         return source_error_count_printable
     

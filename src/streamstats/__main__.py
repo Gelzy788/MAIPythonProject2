@@ -1,10 +1,12 @@
 import argparse
+import sys
 
 from streamstats.analysis.stats_counter import *
 from streamstats.parsing.event_list import *
 from streamstats.parsing.file_parsers import *
 from streamstats.models import *
 from streamstats.result.result import *
+from streamstats.errors import StreamStatsError
 
 def parse_args() -> argparse.Namespace:
     """Парсер CLI
@@ -26,7 +28,7 @@ def parse_args() -> argparse.Namespace:
     
     sub_analyze.add_argument("input", nargs="+")
     sub_analyze.add_argument("--format", nargs="+", required=True)
-    sub_analyze.add_argument("--output", nargs="+", required=False)
+    sub_analyze.add_argument("--output", required=False)
     sub_analyze.add_argument("--skip-invalid", action='store_true')
     
     return parser.parse_args()
@@ -48,5 +50,12 @@ def start_program(args: argparse.Namespace):
     ResultCreator.result_create(stat.to_dict(), args.output)
 
 if __name__ == "__main__":
-    start_program(parse_args())
+    try:
+        start_program(parse_args())
+    except StreamStatsError as err:
+        print(str(err), file=sys.stderr)
+        sys.exit(2)
+    except Exception as err:
+        print(str(err), file=sys.stderr)
+        sys.exit(2)
     # python -m streamstats analyze /home/Gelzy/Documents/MAIPythonProject2/test_csv_files/test_files/valid.jsonl /home/Gelzy/Documents/MAIPythonProject2/test_csv_files/test_files/valid.csv --format jsonl csv --output ./usr/r.jsonl

@@ -13,7 +13,7 @@ class InvalidEventError(StreamStatsError):
     """Ошибка неверного события
     """
     def __init__(self):
-        super().__init__("Хз пока")
+        super().__init__("Лог записан в неправильном формате")
         # TODO: Написать сообщение ошибки
 
 class InvalidTimestampError(InvalidEventError):
@@ -25,5 +25,5 @@ class InvalidTimestampError(InvalidEventError):
 class CliConfigurationError(StreamStatsError):
     """Ошибка конфигурации CLI
     """
-    def __init__(self):
-        super().__init__("Неверная конфигурация CLI")
+    def __init__(self, messege: str=""):
+        super().__init__("Неверная конфигурация CLI:", messege)
