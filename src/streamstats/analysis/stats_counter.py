@@ -55,7 +55,7 @@ class StatsCounter:
         if (self.first_timestamp is None
             or log.timestamp < self.first_timestamp):
             self.first_timestamp = log.timestamp
-        elif (self.last_timestamp is None
+        if (self.last_timestamp is None
             or log.timestamp > self.last_timestamp):
             self.last_timestamp = log.timestamp
     
