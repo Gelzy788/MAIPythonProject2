@@ -15,7 +15,7 @@ class EventList:
     file_format: str
     skip_invalid: bool
     
-    def _parse_file(self, file: _io.TextIOWrapper) -> Itrerator[dict[str: str | Level | datetime]]:
+    def _parse_file(self, file: _io.TextIOWrapper, file_format: str) -> Itrerator[dict[str: str | Level | datetime]]:
         """Запускает парсинг файлов в зависимости от типа файла: json/csv
 
         Args:
@@ -24,10 +24,10 @@ class EventList:
         Returns:
             Итератор с данными из лога в формате словаря
         """
-        if self.file_format == "csv":
-            return parse_csv(file)
-        if self.file_format == "jsonl":
-            return parse_jsonl(file)
+        if file_format == "csv":
+            yield from parse_csv(file)
+        if file_format == "jsonl":
+            yield from parse_jsonl(file)
         
     def __iter__(self) -> Iterator[Event]:
         """Итерирвоание объекта класса
@@ -41,9 +41,10 @@ class EventList:
         Yields:
             Iterator[Event]: один итератор с логом в формате объекта Event
         """
-        for path in self.paths:
+        for num, path in enumerate(self.paths):
+            # TODO: Сделать поддержку ввода файлов без расширения(input вместо input.csv)
             with open(path, "r" , encoding="utf-8") as file:
-                for line_num, line in self._parse_file(file):
+                for line_num, line in self._parse_file(file, self.file_format[num]):
                     try:
                         event = Event.create_event(line)
                         yield event

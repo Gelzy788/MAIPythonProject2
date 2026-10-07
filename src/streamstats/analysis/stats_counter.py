@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from datetime import datetime
 from streamstats.models import Level
-from streamstats.constants import ERROR_LEVELS
+from streamstats.constants import ERROR_LEVELS, HOW_MUCH_TOP_SOURCES
 
 class StatsCounter:
     def __init__(self):
@@ -14,7 +14,7 @@ class StatsCounter:
         self.first_timestamp: datetime = None
         self.last_timestamp: datetime = None
     
-    def _get_top_5_sources(self) -> dict[str, int]:
+    def _get_top_of_sources(self) -> dict[str, int]:
         """Получение топ 5 источников ошибок
         
             Возвращает словарь из топ-5 источников ошибок
@@ -24,9 +24,9 @@ class StatsCounter:
         """
         source_error_count_printable = dict(sorted(self.source_error_count.items(), key=lambda a: a[1], reverse=True))
         
-        if len(source_error_count_printable) >= 5:
+        if len(source_error_count_printable) >= HOW_MUCH_TOP_SOURCES:
             print(dict(list(source_error_count_printable.items())))
-            return dict(list(source_error_count_printable.items())[:5])
+            return dict(list(source_error_count_printable.items())[:HOW_MUCH_TOP_SOURCES])
         return source_error_count_printable
     
     def add_log(self, log: Event) -> None:
@@ -64,7 +64,7 @@ class StatsCounter:
         """Выдает статистику в формате словаря
         
             Преобразует форматы типа datetime и Levels в читаемый вид
-            Получает топ-5 источников ошибок, обращаясь к методу _get_top_5_sources
+            Получает топ-5 источников ошибок, обращаясь к методу _get_top_of_sources
             Генерирует словарь со всеми полями статистики в формате "Поле": "статистика"
 
         Returns:
@@ -77,7 +77,7 @@ class StatsCounter:
         return {"count of logs": self.count_of_logs,
                 "count of levels": count_of_levels_printable,
                 "source event count": self.source_event_count,
-                "top 5 sources by errors ": self._get_top_5_sources(),
+                "top 5 sources by errors ": self._get_top_of_sources(),
                 "first timestamp": self.first_timestamp.isoformat() if self.first_timestamp else None,
                 "last timestamp": self.last_timestamp.isoformat() if self.last_timestamp else None,
                 }

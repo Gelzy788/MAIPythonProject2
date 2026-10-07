@@ -1,18 +1,52 @@
+import argparse
+
 from streamstats.analysis.stats_counter import *
 from streamstats.parsing.event_list import *
 from streamstats.parsing.file_parsers import *
 from streamstats.models import *
 from streamstats.result.result import *
 
-if __name__ == "__main__":
-    stat = StatsCounter()
-    for i in EventList(["test_csv_files/test_files/valid.jsonl"], "jsonl", False):
-        stat.add_log(i)
+def parse_args() -> argparse.Namespace:
+    """Парсер CLI
 
-    ResultCreator.result_create(result=stat.to_dict())
-    # print(stat.count_of_levels[Level.CRITICAL])
-    # print(stat.count_of_logs)
-    # print(stat.source_error_count)
-    # print(stat.source_event_count)
-    # print(stat.first_timestamp)
-    # print(stat.last_timestamp)
+        Читает аргументы, введенные в CLI пользователем и возвращае их
+        
+    Returns:
+        args (argparse.Namespace): Аргументы, введенные пользователем в CLI
+    """
+    parser = argparse.ArgumentParser(
+        prog="streamstats"
+    )
+    
+    subparser = parser.add_subparsers(
+        dest="command", required=True, title="команды", metavar="КОМАНДА"
+    )
+    
+    sub_analyze = subparser.add_parser("analyze")
+    
+    sub_analyze.add_argument("input", nargs="+")
+    sub_analyze.add_argument("--format", nargs="+", required=True)
+    sub_analyze.add_argument("--output", nargs="+", required=False)
+    sub_analyze.add_argument("--skip-invalid", action='store_true')
+    
+    return parser.parse_args()
+
+def start_program(args: argparse.Namespace):
+    """Начинает выполнение программы
+    
+        Оркестриурет выполнение программы:
+        Сначала запускает парсинг файла и сбор статистики
+        Потом запускает вывод результатов в запрошенном формате
+
+    Args:
+        args (argparse.Namespace): Аргументы, введенные пользователем в CLI
+    """
+    stat = StatsCounter()
+    for i in EventList(args.input, args.format, args.skip_invalid):
+        stat.add_log(i)
+    
+    ResultCreator.result_create(stat.to_dict(), args.output)
+
+if __name__ == "__main__":
+    start_program(parse_args())
+    # python -m streamstats analyze /home/Gelzy/Documents/MAIPythonProject2/test_csv_files/test_files/valid.jsonl /home/Gelzy/Documents/MAIPythonProject2/test_csv_files/test_files/valid.csv --format jsonl csv --output ./usr/r.jsonl
