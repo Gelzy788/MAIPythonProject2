@@ -1,7 +1,7 @@
 from enum import Enum
 from dataclasses import dataclass
 from datetime import datetime
-from streamstats.errors import InvalidTimestampError
+from streamstats.errors import InvalidTimestampError, InvalidEventError
 
 class Level(Enum):
     """Enum уровней логов.
@@ -11,6 +11,8 @@ class Level(Enum):
     WARNING = "WARNING"
     ERROR = "ERROR"
     CRITICAL = "CRITICAL"
+
+REQUIRED_FIELDS = ("timestamp", "level", "source", "message")
 
 @dataclass(frozen=True)
 class Event:
@@ -35,18 +37,37 @@ class Event:
         Returns:
             Event: Объект класса Event
         """
+        if not isinstance(data, dict):
+            raise InvalidEventError("Лог должен быть объектом с полями timestamp, level, source, message")
+        
+        missing_fields = [field for field in REQUIRED_FIELDS if data.get(field) is None]
+        if missing_fields:
+            raise InvalidEventError(f"Отсутствуют обязательные поля: {', '.join(missing_fields)}")
+        
+        if not isinstance(data["timestamp"], str):
+            raise InvalidTimestampError("Временная метка должна быть строкой")
+        
         try:
             timestamp = datetime.fromisoformat(data["timestamp"])
         except ValueError:
             raise InvalidTimestampError()
         
+        if not isinstance(data["level"], str):
+            raise InvalidEventError("Уровень лога должен быть строкой")
+        
         try: # NOTE: Надо ли писать кастомное сообщение? Или вообще сделать отдельную ошибку?
             level = Level(data["level"].upper())
         except ValueError:
-            raise InvalidEventError()
+            raise InvalidEventError(f"Неизвестный уровень лога: {data['level']}")
         
-        if data["source"] == "":
-            raise InvalidEventError()
+        if not isinstance(data["source"], str):
+            raise InvalidEventError("Источник лога должен быть строкой")
+        
+        if data["source"].strip() == "":
+            raise InvalidEventError("Источник лога не может быть пустым")
+        
+        if not isinstance(data["message"], str):
+            raise InvalidEventError("Сообщение лога должно быть строкой")
         
         return Event(timestamp,
                     level,
