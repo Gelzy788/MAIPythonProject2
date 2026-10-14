@@ -1,5 +1,8 @@
 import argparse
 import sys
+from datetime import datetime
+import logging
+import os
 
 from streamstats.analysis.stats_counter import *
 from streamstats.parsing.event_list import *
@@ -8,6 +11,7 @@ from streamstats.models import *
 from streamstats.result.result import *
 from streamstats.errors import StreamStatsError
 from streamstats.constants import SUPPORTED_FORMATS
+
 
 def parse_args() -> argparse.Namespace:
     """Парсер CLI
@@ -53,6 +57,14 @@ def start_program(args: argparse.Namespace):
     ResultCreator.result_create(stat.to_dict(), args.output)
 
 def main():
+    # Создание папки и файла с логами
+    os.makedirs("logs", exist_ok=True)
+    time_now = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    logging.basicConfig(level=logging.INFO,
+                        filename=f"logs/{time_now}_streamstats.log",
+                        filemode="w",
+                        format="%(asctime)s %(levelname)s %(message)s")
+    
     try:
         start_program(parse_args())
     except StreamStatsError as err:

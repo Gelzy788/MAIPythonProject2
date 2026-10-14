@@ -6,6 +6,8 @@ from streamstats.errors import (InvalidEventError, UnsupportedFormatError,
 from streamstats.constants import SUPPORTED_FORMATS
 from streamstats.parsing.file_parsers import parse_csv, parse_jsonl
 
+import logging
+
 @dataclass()
 class EventList:
     """Парсинг и получение логов в формате event
@@ -28,7 +30,7 @@ class EventList:
         for file_format in self.file_format:
             if file_format not in SUPPORTED_FORMATS:
                 raise UnsupportedFormatError(f"Формат {file_format} не поддерживается. "
-                                             f"Доступные форматы: {', '.join(sorted(SUPPORTED_FORMATS))}")
+                                            f"Доступные форматы: {', '.join(sorted(SUPPORTED_FORMATS))}")
         
         for path in self.paths:
             if not Path(path).exists():
@@ -84,7 +86,9 @@ class EventList:
                                                         f"в строке {line_num} "
                                                         f"ошибка: {err}") from err
                             # TODO Сделать логирование WARNING
-                            print("WARNING")
+                            # print("WARNING")
+                            logging.warning("Invalid event")
+                            yield "WARNING"
                             continue
                 except UnicodeDecodeError as err:
                     raise StreamStatsError(f"Файл {path} не является текстовым файлом в кодировке UTF-8") from err

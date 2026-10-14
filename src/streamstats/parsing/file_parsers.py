@@ -4,7 +4,6 @@ import json
 from streamstats.errors import InvalidEventError
 from streamstats.models import REQUIRED_FIELDS
 
-#TODO: Сделать поддержку различных разделителей
 def parse_csv(file: _io.TextIOWrapper) -> Iterator[dict[str, str | Level | datetime]]:
     """Построчный парсер файлов в формате csv
 

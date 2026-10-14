@@ -8,6 +8,7 @@ class StatsCounter:
         """Инициализация класса
         """
         self.count_of_logs: int = 0
+        self.skipped_str_count: int = 0
         self.count_of_levels: dict = {level: 0 for level in Level}
         self.source_event_count: dict = {}
         self.source_error_count: dict = {}
@@ -28,7 +29,7 @@ class StatsCounter:
             return dict(list(source_error_count_printable.items())[:HOW_MUCH_TOP_SOURCES])
         return source_error_count_printable
     
-    def add_log(self, log: Event) -> None:
+    def add_log(self, log: Event | str) -> None:
         """Добавить лог в статистику
         
             Принимает на вход лог в формате объекта Event и
@@ -37,27 +38,30 @@ class StatsCounter:
         Args:
             log (Event): данные одного лога(строки из файла)
         """
-        self.count_of_logs += 1
-        self.count_of_levels[log.level] += 1
-        
-        if log.source in self.source_event_count:
-            self.source_event_count[log.source] += 1
+        if log == "WARNING":
+            self.skipped_str_count += 1
         else:
-            self.source_event_count[log.source] = 1
-        
-        
-        if log.level in ERROR_LEVELS:
-            if log.source in self.source_error_count:
-                self.source_error_count[log.source] += 1
+            self.count_of_logs += 1
+            self.count_of_levels[log.level] += 1
+            
+            if log.source in self.source_event_count:
+                self.source_event_count[log.source] += 1
             else:
-                self.source_error_count[log.source] = 1
-        
-        if (self.first_timestamp is None
-            or log.timestamp < self.first_timestamp):
-            self.first_timestamp = log.timestamp
-        if (self.last_timestamp is None
-            or log.timestamp > self.last_timestamp):
-            self.last_timestamp = log.timestamp
+                self.source_event_count[log.source] = 1
+            
+            
+            if log.level in ERROR_LEVELS:
+                if log.source in self.source_error_count:
+                    self.source_error_count[log.source] += 1
+                else:
+                    self.source_error_count[log.source] = 1
+            
+            if (self.first_timestamp is None
+                or log.timestamp < self.first_timestamp):
+                self.first_timestamp = log.timestamp
+            if (self.last_timestamp is None
+                or log.timestamp > self.last_timestamp):
+                self.last_timestamp = log.timestamp
     
     def to_dict(self) -> dict[str, str | dict[str, int] | int]:
         """Выдает статистику в формате словаря
@@ -73,10 +77,16 @@ class StatsCounter:
         for key, value in self.count_of_levels.items():
             count_of_levels_printable[key.value] = value
             
-        return {"count of logs": self.count_of_logs,
-                "count of levels": count_of_levels_printable,
-                "source event count": self.source_event_count,
-                "top 5 sources by errors ": self._get_top_of_sources(),
-                "first timestamp": self.first_timestamp.isoformat() if self.first_timestamp else None,
-                "last timestamp": self.last_timestamp.isoformat() if self.last_timestamp else None,
-                }
+        result = {
+            "count of logs": self.count_of_logs,
+            "count of levels": count_of_levels_printable,
+            "source event count": self.source_event_count,
+            "top 5 sources by errors": self._get_top_of_sources(),
+            "first timestamp": self.first_timestamp.isoformat() if self.first_timestamp else None,
+            "last timestamp": self.last_timestamp.isoformat() if self.last_timestamp else None,
+        }
+        if self.skipped_str_count > 0:
+            result["count of skipped strs"] = self.skipped_str_count
+        return result
+
+        
