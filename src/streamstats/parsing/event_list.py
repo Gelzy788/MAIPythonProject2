@@ -70,7 +70,7 @@ class EventList:
             try:
                 file = open(path, "r", encoding="utf-8-sig", newline="")
             except OSError as err:
-                raise CliConfigurationError(f"Не удалось открыть файл {path}: {err.strerror}") from err
+                raise CliConfigurationError(f"Не удалось открыть файл {path}: {err.strerror}")
             
             with file:
                 try:
@@ -84,15 +84,9 @@ class EventList:
                             if not self.skip_invalid:
                                 raise InvalidEventError(f"В логе по пути {path} "
                                                         f"в строке {line_num} "
-                                                        f"ошибка: {err}") from err
-                            # TODO Сделать логирование WARNING
-                            # print("WARNING")
+                                                        f"ошибка: {err}")
                             logging.warning("Invalid event")
                             yield "WARNING"
                             continue
                 except UnicodeDecodeError as err:
-                    raise StreamStatsError(f"Файл {path} не является текстовым файлом в кодировке UTF-8") from err
-
-if __name__ == "__main__":
-    for i in EventList(["test_csv_files/test_files/valid.csv"], "csv", False):
-        print(i)
+                    raise StreamStatsError(f"Файл {path} не является текстовым файлом в кодировке UTF-8")
