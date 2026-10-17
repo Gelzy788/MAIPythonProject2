@@ -1,7 +1,6 @@
 class StreamStatsError(Exception):
     """Родительская ошбика для всей программы
     """
-    pass
 
 class UnsupportedFormatError(StreamStatsError):
     """Ошибка неподдерживаемого формата файла логов

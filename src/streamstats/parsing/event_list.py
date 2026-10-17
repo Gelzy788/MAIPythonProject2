@@ -1,12 +1,21 @@
+import logging
+from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
-from streamstats.models import Event
-from streamstats.errors import (InvalidEventError, UnsupportedFormatError,
-                                CliConfigurationError, StreamStatsError)
-from streamstats.constants import SUPPORTED_FORMATS
-from streamstats.parsing.file_parsers import parse_csv, parse_jsonl
+from typing import TextIO
 
-import logging
+from streamstats.constants import SUPPORTED_FORMATS
+from streamstats.errors import (
+    CliConfigurationError,
+    InvalidEventError,
+    StreamStatsError,
+    UnsupportedFormatError,
+)
+from streamstats.models import Event
+from streamstats.parsing.file_parsers import ParsedRow, parse_csv, parse_jsonl
+
+logger = logging.getLogger(__name__)
+
 
 @dataclass()
 class EventList:
@@ -38,11 +47,11 @@ class EventList:
             if not Path(path).is_file():
                 raise CliConfigurationError(f"{path} не является файлом")
     
-    def _parse_file(self, file: _io.TextIOWrapper, file_format: str) -> Itrerator[dict[str: str | Level | datetime]]:
+    def _parse_file(self, file: TextIO, file_format: str) -> Iterator[ParsedRow]:
         """Запускает парсинг файлов в зависимости от типа файла: json/csv
 
         Args:
-            file (_io.TextIOWrapper): Уже открытый файл
+            file (TextIO): Уже открытый файл
 
         Returns:
             Итератор с данными из лога в формате словаря
@@ -54,7 +63,7 @@ class EventList:
         else:
             raise UnsupportedFormatError(f"Формат {file_format} не поддерживается")
         
-    def __iter__(self) -> Iterator[Event]:
+    def __iter__(self) -> Iterator[Event | str]:
         """Итерирвоание объекта класса
         
             При каждом запросе парсит файл, упаковывет данные в объект Event
@@ -68,25 +77,33 @@ class EventList:
         """
         for num, path in enumerate(self.paths):
             try:
-                file = open(path, "r", encoding="utf-8-sig", newline="")
+                with open(path, "r", encoding="utf-8-sig", newline="") as file:
+                    yield from self._iter_file(file, path, self.file_format[num])
             except OSError as err:
-                raise CliConfigurationError(f"Не удалось открыть файл {path}: {err.strerror}")
-            
-            with file:
+                raise CliConfigurationError(f"Не удалось открыть файл {path}: {err.strerror}") from err
+
+    def _iter_file(self, file: TextIO, path: Path, file_format: str) -> Iterator[Event | str]:
+        """Превращает строки одного открытого файла в объекты Event
+
+        Raises:
+            InvalidEventError: Если в логе ошибка и не включён skip_invalid
+            StreamStatsError: Если файл не в кодировке UTF-8
+
+        Yields:
+            Event или строка "WARNING" для пропущенной невалидной строки
+        """
+        try:
+            for line_num, line in self._parse_file(file, file_format):
                 try:
-                    for line_num, line in self._parse_file(file, self.file_format[num]):
-                        try:
-                            if isinstance(line, InvalidEventError):
-                                raise line
-                            event = Event.create_event(line)
-                            yield event
-                        except InvalidEventError as err:
-                            if not self.skip_invalid:
-                                raise InvalidEventError(f"В логе по пути {path} "
-                                                        f"в строке {line_num} "
-                                                        f"ошибка: {err}")
-                            logging.warning(f"Invalid event: {type(err).__name__}, {line_num}, {err}")
-                            yield "WARNING"
-                            continue
-                except UnicodeDecodeError as err:
-                    raise StreamStatsError(f"Файл {path} не является текстовым файлом в кодировке UTF-8")
+                    if isinstance(line, InvalidEventError):
+                        raise line
+                    yield Event.create_event(line)
+                except InvalidEventError as err:
+                    if not self.skip_invalid:
+                        raise InvalidEventError(f"В логе по пути {path} "
+                                                f"в строке {line_num} "
+                                                f"ошибка: {err}") from err
+                    logger.warning("Invalid event: %s, %s, %s", type(err).__name__, line_num, err)
+                    yield "WARNING"
+        except UnicodeDecodeError as err:
+            raise StreamStatsError(f"Файл {path} не является текстовым файлом в кодировке UTF-8") from err

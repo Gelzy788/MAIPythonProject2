@@ -1,10 +1,17 @@
 import csv
 import json
+from collections.abc import Iterator
+from typing import Any, TextIO
 
 from streamstats.errors import InvalidEventError
 from streamstats.models import REQUIRED_FIELDS
 
-def parse_csv(file: _io.TextIOWrapper) -> Iterator[dict[str, str | Level | datetime]]:
+# (номер строки, данные строки). Данные - словарь из CSV, любое значение из JSON
+# или InvalidEventError, если строку не удалось разобрать
+ParsedRow = tuple[int, Any]
+
+
+def parse_csv(file: TextIO) -> Iterator[ParsedRow]:
     """Построчный парсер файлов в формате csv
 
     Yields:
@@ -18,7 +25,7 @@ def parse_csv(file: _io.TextIOWrapper) -> Iterator[dict[str, str | Level | datet
         separator = sniffer.sniff(sample, delimiters=[',', ';', '\t', '|'])
         reader = csv.DictReader(file, delimiter=separator.delimiter)
     except csv.Error as err:
-        raise InvalidEventError(f"Файл не должен быть пустым")
+        raise InvalidEventError("Файл не должен быть пустым") from err
     
     if reader.fieldnames is None:
         return
@@ -34,7 +41,7 @@ def parse_csv(file: _io.TextIOWrapper) -> Iterator[dict[str, str | Level | datet
             continue
         yield (reader.line_num, line_data)
 
-def parse_jsonl(file: _io.TextIOWrapper) -> Iterator[dict[str, str | Level | datetime]]:
+def parse_jsonl(file: TextIO) -> Iterator[ParsedRow]:
     """Построчный парсер файлов в формате jsonl
 
     Yields:

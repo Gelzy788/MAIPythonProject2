@@ -1,7 +1,8 @@
-from dataclasses import dataclass, field
 from datetime import datetime
-from streamstats.models import Level
+
 from streamstats.constants import ERROR_LEVELS, HOW_MUCH_TOP_SOURCES
+from streamstats.models import Event, Level
+
 
 class StatsCounter:
     def __init__(self):

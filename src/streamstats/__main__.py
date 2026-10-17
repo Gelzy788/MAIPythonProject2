@@ -1,16 +1,11 @@
 import argparse
 import sys
-from datetime import datetime
-import logging
-import os
 
-from streamstats.analysis.stats_counter import *
-from streamstats.parsing.event_list import *
-from streamstats.parsing.file_parsers import *
-from streamstats.models import *
-from streamstats.result.result import *
-from streamstats.errors import StreamStatsError
+from streamstats.analysis.stats_counter import StatsCounter
 from streamstats.constants import SUPPORTED_FORMATS
+from streamstats.errors import StreamStatsError
+from streamstats.parsing.event_list import EventList
+from streamstats.result.result import ResultCreator
 
 
 def parse_args() -> argparse.Namespace:
@@ -62,8 +57,6 @@ def main():
     except StreamStatsError as err:
         print(str(err), file=sys.stderr)
         sys.exit(2)
-    except Exception as err:
-        print(str(err), file=sys.stderr)
 
 if __name__ == "__main__":
     main()
