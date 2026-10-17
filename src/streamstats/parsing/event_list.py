@@ -85,7 +85,7 @@ class EventList:
                                 raise InvalidEventError(f"В логе по пути {path} "
                                                         f"в строке {line_num} "
                                                         f"ошибка: {err}")
-                            logging.warning("Invalid event")
+                            logging.warning(f"Invalid event: {type(err).__name__}, {line_num}, {err}")
                             yield "WARNING"
                             continue
                 except UnicodeDecodeError as err:

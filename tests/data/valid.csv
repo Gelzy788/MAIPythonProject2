@@ -1,0 +1,5 @@
+timestamp,level,source,message
+2026-10-01T10:00:00+03:00,INFO,auth,User logged in
+2026-10-01T10:05:00+03:00,ERROR,db,Connection lost
+2026-10-01T10:10:00+03:00,WARNING,auth,Slow response
+2026-10-01T10:15:00+03:00,CRITICAL,db,Disk full

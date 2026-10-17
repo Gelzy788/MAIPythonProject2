@@ -55,7 +55,7 @@ class Event:
         if not isinstance(data["level"], str):
             raise InvalidEventError("Уровень лога должен быть строкой")
         
-        try: # NOTE: Надо ли писать кастомное сообщение? Или вообще сделать отдельную ошибку?
+        try:
             level = Level(data["level"].upper())
         except ValueError:
             raise InvalidEventError(f"Неизвестный уровень лога: {data['level']}")

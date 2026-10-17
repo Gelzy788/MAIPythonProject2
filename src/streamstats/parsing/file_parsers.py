@@ -11,12 +11,14 @@ def parse_csv(file: _io.TextIOWrapper) -> Iterator[dict[str, str | Level | datet
         Итератор с данными одного лога в формате словаря
     """
     # Находим разделитель
-    sample = file.readline()
-    file.seek(0)
-    sniffer = csv.Sniffer()
-    separator = sniffer.sniff(sample, delimiters=[',', ';', '\t', '|'])
-
-    reader = csv.DictReader(file, delimiter=separator.delimiter)
+    try:
+        sample = file.readline()
+        file.seek(0)
+        sniffer = csv.Sniffer()
+        separator = sniffer.sniff(sample, delimiters=[',', ';', '\t', '|'])
+        reader = csv.DictReader(file, delimiter=separator.delimiter)
+    except csv.Error as err:
+        raise InvalidEventError(f"Файл не должен быть пустым")
     
     if reader.fieldnames is None:
         return
