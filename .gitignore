@@ -2,7 +2,6 @@
 .kanban
 TZ/
 test_csv_files/
-requirements.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
