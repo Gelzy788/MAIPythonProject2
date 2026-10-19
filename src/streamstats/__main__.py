@@ -1,5 +1,6 @@
 import argparse
 import sys
+import logging
 
 from streamstats.analysis.stats_counter import StatsCounter
 from streamstats.constants import SUPPORTED_FORMATS
@@ -52,6 +53,7 @@ def start_program(args: argparse.Namespace):
     ResultCreator.result_create(stat.to_dict(), args.output)
 
 def main():
+    logging.basicConfig(level=logging.WARNING, format="%(levelname)s: %(message)s")
     try:
         start_program(parse_args())
     except StreamStatsError as err:
