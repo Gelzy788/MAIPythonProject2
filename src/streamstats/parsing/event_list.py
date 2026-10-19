@@ -41,11 +41,14 @@ class EventList:
                 raise UnsupportedFormatError(f"Формат {file_format} не поддерживается. "
                                             f"Доступные форматы: {', '.join(sorted(SUPPORTED_FORMATS))}")
         
-        for path in self.paths:
+        for num, path in enumerate(self.paths):
             if not Path(path).exists():
                 raise CliConfigurationError(f"Файл {path} не найден")
             if not Path(path).is_file():
                 raise CliConfigurationError(f"{path} не является файлом")
+            if Path(path).suffix.lower() != f".{self.file_format[num]}":
+                raise CliConfigurationError(f"Расширение файла {path} не соответствует "
+                                            f"указанному формату {self.file_format[num]}")
     
     def _parse_file(self, file: TextIO, file_format: str) -> Iterator[ParsedRow]:
         """Запускает парсинг файлов в зависимости от типа файла: json/csv

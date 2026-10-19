@@ -26,7 +26,7 @@ class Event:
     message: str
     
     @staticmethod
-    def create_event(data: dict) -> "Event":
+    def create_event(data: dict) -> Event:
         """Конструктор объектов Event
 
         Args:
